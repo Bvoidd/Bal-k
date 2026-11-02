@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balıkçı — Piksel Clicker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1122;--panel:#232a4a;--panel2:#1a2040;--line:#05070f;--text:#e8ecff;--muted:#8e98c8;--gold:#ffd166;--good:#6ee7a0;--bad:#ff6b6b;--btn:#3f78c8}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;color:var(--text);font-family:'VT323','Courier New',monospace;font-size:20px;line-height:1.15}
+body{background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 2px,transparent 2px 4px),var(--bg);min-height:100vh}
+#app{max-width:1200px;margin:0 auto;padding:12px}
+.px{background:var(--panel);border:4px solid var(--line);box-shadow:inset -4px -4px 0 rgba(0,0,0,.35),inset 4px 4px 0 rgba(255,255,255,.1),0 4px 0 var(--line)}
+.hd{font-family:'Press Start 2P','Courier New',monospace}
+#topbar{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center;padding:12px 16px;margin-bottom:14px}
+.stat{display:flex;flex-direction:column;gap:6px}
+.stat .lbl{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--muted)}
+.stat .val{font-family:'Press Start 2P',monospace;font-size:15px;color:var(--gold);text-shadow:2px 2px 0 #000}
+.stat .val.s{color:var(--text);font-size:12px}
+.stat .sub{font-size:18px;color:var(--muted)}
+#topbar .grow{flex:1}
+.btn{position:relative;overflow:hidden;font-family:'Press Start 2P',monospace;font-size:9px;line-height:1.4;color:#fff;background:var(--btn);border:3px solid var(--line);padding:9px 11px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.25);text-shadow:1px 1px 0 rgba(0,0,0,.6);user-select:none}
+.btn:hover{filter:brightness(1.12)}
+.btn:active{transform:translateY(2px)}
+.btn.cant{filter:grayscale(.85) brightness(.65);cursor:not-allowed}
+.btn.good{background:#2f9e5a}
+.btn.bad{background:#b8453f}
+.btn.on{background:#e0a030;color:#201400;text-shadow:none}
+main{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(330px,1fr);gap:14px;align-items:start}
+#stageWrap{padding:6px;background:#05070f}
+#stage,#netCanvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;cursor:pointer;touch-action:manipulation;background:#111;user-select:none}
+#spotTabs{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+#spotTabs .btn{flex:1;min-width:110px}
+#skillBar{margin-top:12px;padding:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#netBtn{flex:0 0 auto;min-width:250px;padding:14px 12px;font-size:10px}
+#netBtn .cd{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(0,0,0,.55);pointer-events:none}
+#netBtn span.t{position:relative}
+#skillBar .hint{flex:1;min-width:180px;color:var(--muted);font-size:19px}
+#help{margin-top:12px;padding:8px 12px;color:var(--muted);font-size:19px}
+aside{padding:10px;max-height:calc(100vh - 110px);overflow-y:auto;min-height:420px}
+#tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+#tabs .btn{flex:1;padding:8px 4px}
+.tab{display:none}.tab.on{display:block}
+.sec{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);margin:14px 2px 8px;display:flex;justify-content:space-between;gap:6px}
+.sec:first-child{margin-top:4px}
+.item{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:8px 9px;background:var(--panel2);border:3px solid var(--line);margin-bottom:8px}
+.item .meta{flex:1;min-width:0}
+.item .t{font-family:'Press Start 2P',monospace;font-size:9px;line-height:1.5;margin-bottom:4px}
+.item .d{font-size:18px;color:var(--muted)}
+.item .d b{color:var(--text);font-weight:normal}
+.item .d .skill{color:var(--good)}
+.item .buy{flex:0 0 auto;min-width:92px;text-align:center}
+.item.ach{opacity:.5}.item.ach.done{opacity:1;border-color:#e0a030}
+.item.ach .badge{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--muted)}
+.item.ach.done .badge{color:var(--gold)}
+.dexgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:8px}
+.dexcard{background:var(--panel2);border:3px solid var(--line);padding:8px;text-align:center}
+.dexcard canvas{image-rendering:pixelated;image-rendering:crisp-edges;margin:2px auto 6px;display:block}
+.dexcard .dn{font-family:'Press Start 2P',monospace;font-size:8px;line-height:1.5;margin-bottom:3px}
+.dexcard .dr{font-size:17px}
+.dexcard .dh{font-size:17px;color:var(--muted)}
+.dexcard .dc{font-size:17px;color:var(--text)}
+textarea{width:100%;background:#0b0f20;color:var(--text);border:3px solid var(--line);font-family:'VT323',monospace;font-size:16px;padding:6px;resize:vertical}
+.row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(5,7,20,.85);display:flex;align-items:center;justify-content:center;padding:14px}
+.netBox{width:min(900px,100%);padding:10px}
+.netHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;font-family:'Press Start 2P',monospace;font-size:12px;color:var(--gold)}
+#netInfo{margin-top:10px;color:var(--muted);font-size:19px}
+#toasts{position:fixed;top:12px;right:12px;z-index:80;display:flex;flex-direction:column;gap:8px;max-width:min(360px,90vw);pointer-events:none}
+.toast{background:var(--panel);border:4px solid var(--line);padding:9px 12px;font-size:19px;box-shadow:inset 3px 3px 0 rgba(255,255,255,.1),0 4px 0 var(--line);transition:opacity .4s,transform .4s}
+.toast.good{border-color:#2f9e5a}.toast.bad{border-color:#b8453f}.toast.gold{border-color:#e0a030;color:var(--gold)}
+.toast.out{opacity:0;transform:translateX(30px)}
+@media (max-width:900px){main{grid-template-columns:1fr}aside{max-height:none}#netBtn{min-width:0;width:100%}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar" class="px">
+    <div class="stat"><span class="lbl">PARA</span><span id="money" class="val">₺0</span></div>
+    <div class="stat"><span class="lbl">SANİYEDE</span><span id="perSec" class="val s">₺0/sn</span></div>
+    <div class="stat"><span class="lbl">SAAT</span><span id="clock" class="val s">06:00</span><span id="period" class="sub">Gün 1 · Sabah</span></div>
+    <div class="stat"><span class="lbl">BONUS</span><span id="bonus" class="val s">+0%</span></div>
+    <div class="grow"></div>
+    <button id="muteBtn" class="btn">SES: AÇIK</button>
+  </header>
+  <main>
+    <section>
+      <div id="stageWrap" class="px"><canvas id="stage" width="320" height="180"></canvas></div>
+      <div id="spotTabs"></div>
+      <div id="skillBar" class="px">
+        <button id="netBtn" class="btn"><span id="netCd" class="cd"></span><span id="netTxt" class="t">AĞ ATMA</span></button>
+        <div class="hint" id="netHint">Beceriler olta seviyesiyle açılır.</div>
+      </div>
+      <div id="help" class="px">Suya tıkla ya da BOŞLUK tuşuna bas. Gün içindeki saate göre farklı balıklar çıkar. Suda altın bir parıltı görürsen hızlıca üstüne tıkla!</div>
+    </section>
+    <aside class="px">
+      <nav id="tabs">
+        <button class="btn on" data-tab="upg">YÜKSELT</button>
+        <button class="btn" data-tab="dex">BALIKLAR</button>
+        <button class="btn" data-tab="ach">BAŞARIM</button>
+        <button class="btn" data-tab="set">AYAR</button>
+      </nav>
+      <div id="tab-upg" class="tab on"><div id="upgList"></div></div>
+      <div id="tab-dex" class="tab"><div class="sec"><span>KOLEKSİYON</span><span id="dexCount"></span></div><div id="dexList" class="dexgrid"></div></div>
+      <div id="tab-ach" class="tab"><div class="sec"><span>BAŞARIMLAR</span><span id="achBonus"></span></div><div id="achList"></div></div>
+      <div id="tab-set" class="tab">
+        <div class="sec"><span>KAYIT</span></div>
+        <div class="item"><div class="meta"><div class="d">Oyun tarayıcıda otomatik kaydedilir. Yedeklemek ya da başka tarayıcıya taşımak için kodu kullanabilirsin.</div></div></div>
+        <textarea id="saveBox" rows="4" placeholder="Kayıt kodu burada görünür veya buraya yapıştırırsın"></textarea>
+        <div class="row"><button class="btn" id="expBtn">DIŞA AKTAR</button><button class="btn" id="impBtn">İÇE AKTAR</button><button class="btn bad" id="resetBtn">SIFIRLA</button></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div id="netOverlay" class="overlay" hidden>
+  <div class="netBox px">
+    <div class="netHead"><span>AĞ ATMA</span><button id="netCancel" class="btn">VAZGEÇ</button></div>
+    <canvas id="netCanvas" width="320" height="180"></canvas>
+    <div id="netInfo"></div>
+  </div>
+</div>
+<div id="toasts"></div>
+
+<script>
+(() => {
+'use strict';
+const W = 320, H = 180, HOR = 72, KEY = 'balikci_piksel_v1';
+const BOBX = 116, BUCKX = 28;
+
+/* ================= yardımcılar ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rand = (a, b) => a + Math.random() * (b - a);
+const randInt = (a, b) => Math.floor(rand(a, b + 1));
+const pad2 = n => String(n).padStart(2, '0');
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mix = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+const dark = (c, f) => mix([6, 10, 30], c, clamp(f, 0, 1));
+const css = (c, q = 6, a) => {
+  const f = v => clamp(Math.round(v / q) * q, 0, 255);
+  return a === undefined ? `rgb(${f(c[0])},${f(c[1])},${f(c[2])})` : `rgba(${f(c[0])},${f(c[1])},${f(c[2])},${a})`;
+};
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function fmt(n) {
+  if (!isFinite(n)) return '∞';
+  if (n < 10) return (Math.round(n * 10) / 10).toString().replace('.', ',');
+  if (n < 1000) return Math.floor(n).toString();
+  const units = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi'];
+  let u = 0;
+  while (n >= 1000 && u < units.length - 1) { n /= 1000; u++; }
+  return (n < 10 ? n.toFixed(2) : n < 100 ? n.toFixed(1) : n.toFixed(0)).replace('.', ',') + units[u];
+}
+
+/* ================= veri ================= */
+// Balık şablonları (sağa bakar). o:kontur b:gövde d:sırt l:karın f:yüzgeç w:göz beyazı k:gözbebeği
+const TPL = {
+  slim: [
+    "................",
+    "......offfoo....",
+    "..o..oddddddddo.",
+    ".ofoobbbbbbwkboo",
+    "offoobbbbbbbbbo.",
+    ".ofoollllllllloo",
+    "..o..oooooooo...",
+    "................"],
+  round: [
+    "......oooooo....",
+    "....ooddddddoo..",
+    "..ooddddddddddo.",
+    ".oddbbbbbbbbbbdo",
+    "oofbbbbbbbbwkbbo",
+    "offbbbbbbbbbbbbo",
+    "oofbbllllllllllo",
+    ".oflllllllllllo.",
+    "..ooollllllloo..",
+    "....oooooooo...."],
+  eel: [
+    "..........oooooooooooo..",
+    ".....oooodddddddddddwko.",
+    "oooooobbbbbbbbbbbbbbbbbo",
+    "offfooolllllllllllllllloo".slice(0, 24),
+    ".ooo..oooooooooooooooo.."],
+  shark: [
+    "...........oo...........",
+    "..........odfo..........",
+    ".........oddddooooo.....",
+    ".......ooddddddddddooo..",
+    "....ooodddddddddddddddoo",
+    "oooodddddddddddddddwkddo",
+    "ofoodddddddddddddddddddoo",
+    ".ffooolllllllllllllllllo.",
+    "..oooollllllllllllllo....",
+    "......ofooollllooo.......",
+    ".......ooo..oo..........."],
+  ray: [
+    "........oooo......",
+    "......ooddddoo....",
+    "...oooddddddddoo..",
+    "oooooddddddddwkddo",
+    "ooooobbbbbbbbbbboo",
+    "...ooolllllllloo..",
+    "......oolllloo....",
+    "........oooo......"],
+  squid: [
+    "...........oooooo...",
+    "..oo.oooodddddddddoo",
+    ".o..oobbbbbbbbbbwkbo",
+    "oooooobbbbbbbbbbbbbbo".slice(0, 20),
+    ".o..ooblllllllllllloo".slice(0, 20),
+    "..oo.oooollllllllloo",
+    "...........oooooo..."],
+  octo: [
+    "....oooooo....",
+    "..ooddddddoo..",
+    ".oddddddddddo.",
+    "oddbbbbbbbbddo",
+    "obbwkbbbbwkbbo",
+    "obbbbbbbbbbbbo",
+    ".obbbbbbbbbbo.",
+    ".obobobobobbo.",
+    "ob.ob.ob.ob.bo",
+    "o..o..o..o...o",
+    "..o.......o..."]
+};
+
+const RARITY = [
+  { n: 'Sıradan', c: '#d0d4e0', w: 100 },
+  { n: 'Ender', c: '#6ee7a0', w: 45 },
+  { n: 'Nadir', c: '#6ab0ff', w: 14 },
+  { n: 'Çok Nadir', c: '#c58bff', w: 4 },
+  { n: 'Efsanevi', c: '#ffd166', w: 0 }
+];
+const SPOTS = [
+  { n: 'Göl', cost: 0, tint: [0.85, 1.05, 0.9] },
+  { n: 'Nehir', cost: 400, tint: [1, 1.02, 0.88] },
+  { n: 'Deniz', cost: 6000, tint: [0.85, 0.95, 1.15] }
+];
+// hours: null = her saat, aralıklar [başlangıç, bitiş) ve gece yarısını aşabilir
+const FISH = [
+  { id: 'sazan', name: 'Sazan', tpl: 'round', spot: 0, value: 5, rar: 0, hours: [[5, 11]], pal: { o: '#3b2a14', b: '#c8943a', d: '#8a5a1f', l: '#f0d58a', f: '#a86a2a' } },
+  { id: 'levrek', name: 'Tatlısu Levreği', tpl: 'slim', spot: 0, value: 3, rar: 0, hours: null, pal: { o: '#1d3a2a', b: '#7fae6a', d: '#3f7a4a', l: '#d8e8c0', f: '#5a9a5a' } },
+  { id: 'gumus', name: 'Gümüş Balık', tpl: 'slim', spot: 0, value: 6, rar: 0, hours: [[11, 17]], pal: { o: '#2a3550', b: '#c4ccd8', d: '#7f8aa6', l: '#f4f6fa', f: '#9aa6c0' } },
+  { id: 'yayin', name: 'Yayın', tpl: 'eel', spot: 0, value: 40, rar: 2, hours: [[21, 5]], pal: { o: '#14181c', b: '#4a5560', d: '#2a323a', l: '#8a95a0', f: '#3a444e' } },
+  { id: 'turna', name: 'Turna', tpl: 'slim', spot: 1, value: 14, rar: 0, hours: [[9, 18]], pal: { o: '#243a1a', b: '#8aa84a', d: '#4a6a2a', l: '#e0e8a0', f: '#c8a040' } },
+  { id: 'alabalik', name: 'Alabalık', tpl: 'slim', spot: 1, value: 11, rar: 1, hours: [[5, 9], [18, 22]], pal: { o: '#2a2a40', b: '#9ec4b8', d: '#5a8a8a', l: '#ffb3c1', f: '#d86a8a' } },
+  { id: 'yilan', name: 'Yılan Balığı', tpl: 'eel', spot: 1, value: 28, rar: 1, hours: [[21, 5]], pal: { o: '#101a14', b: '#5a6a3a', d: '#2f3b20', l: '#c0c890', f: '#4a5a30' } },
+  { id: 'mersin', name: 'Mersin Balığı', tpl: 'shark', spot: 1, value: 90, rar: 3, hours: [[2, 6]], pal: { o: '#2a2218', b: '#8a7a5a', d: '#5a4a30', l: '#d8caa0', f: '#6a5a3a' } },
+  { id: 'hamsi', name: 'Hamsi', tpl: 'slim', spot: 2, value: 9, rar: 0, hours: [[5, 10]], pal: { o: '#1a2a40', b: '#9ab8d8', d: '#3a5a8a', l: '#e8f0ff', f: '#6a88b0' } },
+  { id: 'palamut', name: 'Palamut', tpl: 'slim', spot: 2, value: 22, rar: 0, hours: [[10, 18]], pal: { o: '#10243a', b: '#4a80b0', d: '#1f4a7a', l: '#c0d8f0', f: '#2f6090' } },
+  { id: 'cipura', name: 'Çipura', tpl: 'round', spot: 2, value: 16, rar: 1, hours: null, pal: { o: '#2a2a30', b: '#c8ccd0', d: '#7a8088', l: '#f6f6f6', f: '#d8b050' } },
+  { id: 'ahtapot', name: 'Ahtapot', tpl: 'octo', spot: 2, value: 60, rar: 2, hours: [[17, 22]], pal: { o: '#3a1020', b: '#d85a5a', d: '#a03040', l: '#f0a0a0', f: '#c04050' } },
+  { id: 'kalamar', name: 'Kalamar', tpl: 'squid', spot: 2, value: 48, rar: 1, hours: [[22, 4]], pal: { o: '#3a2a4a', b: '#e8c8e8', d: '#a888c8', l: '#fff0ff', f: '#c8a0d8' } },
+  { id: 'vatoz', name: 'Vatoz', tpl: 'ray', spot: 2, value: 85, rar: 2, hours: [[21, 4]], pal: { o: '#1a2030', b: '#6a7a9a', d: '#3a4a6a', l: '#b0bcd8', f: '#4a5a7a' } },
+  { id: 'kopek', name: 'Köpek Balığı', tpl: 'shark', spot: 2, value: 300, rar: 3, hours: [[2, 6]], pal: { o: '#10161e', b: '#6a7a8a', d: '#38444f', l: '#e8eef2', f: '#2a343e' } },
+  { id: 'altin', name: 'Altın Balık', tpl: 'round', spot: -1, value: 0, rar: 4, hours: null, pal: { o: '#7a3a00', b: '#ffcc33', d: '#ff9a1f', l: '#fff2a0', f: '#ff7a1f' } }
+];
+const FISH_BY_ID = Object.fromEntries(FISH.map(f => [f.id, f]));
+
+const ROD = [
+  { n: 'Bambu Olta', mult: 1, cost: 0, col: '#c9a45a' },
+  { n: 'Kamış Olta', mult: 1.5, cost: 50, col: '#a8783a' },
+  { n: 'Fiberglas Olta', mult: 2.2, cost: 160, col: '#e8f0f8' },
+  { n: 'Teleskopik Olta', mult: 3.2, cost: 450, col: '#9ad0ff' },
+  { n: 'Karbon Olta', mult: 4.6, cost: 1200, col: '#3a404c' },
+  { n: 'Profesyonel Olta', mult: 6.5, cost: 3200, col: '#ff6a5a' },
+  { n: 'Titanyum Olta', mult: 9, cost: 9000, col: '#c8d0e0' },
+  { n: 'Efsanevi Olta', mult: 13, cost: 25000, col: '#b080ff' },
+  { n: 'Kadim Olta', mult: 20, cost: 70000, col: '#ffd166' }
+];
+// Ağ becerisi: olta seviyesine göre kademeler
+const NET_TIERS = [null,
+  { min: 2, max: 3, R: 40, cd: 30, mult: 8 },
+  { min: 3, max: 5, R: 48, cd: 25, mult: 12 },
+  { min: 6, max: 8, R: 58, cd: 20, mult: 20 }
+];
+const UPG = [
+  { key: 'bait', n: 'Yem', max: 10, base: 80, g: 1.75, d: 'Nadir balıkların çıkma şansını artırır.', eff: l => `Nadir ×${(1 + 0.25 * l).toFixed(2).replace('.', ',')}` },
+  { key: 'critLv', n: 'Şanslı Tık', max: 10, base: 150, g: 1.9, d: 'Kritik tıkta 5 kat para gelir.', eff: l => `Kritik %${5 + 2 * l}` },
+  { key: 'lantern', n: 'Gece Feneri', max: 5, base: 300, g: 2.1, d: 'Gece (21:00–05:00) çıkan balıklar daha sık gelir.', eff: l => `Gece ×${(1 + 0.3 * l).toFixed(1).replace('.', ',')}` },
+  { key: 'morning', n: 'Sabah Yemi', max: 5, base: 300, g: 2.1, d: 'Sabah (05:00–11:00) çıkan balıklar daha sık gelir.', eff: l => `Sabah ×${(1 + 0.3 * l).toFixed(1).replace('.', ',')}` }
+];
+const GEN = [
+  { n: 'Çırak Balıkçı', base: 40, inc: 1, d: 'Senin yerine olta sallar.' },
+  { n: 'Küçük Tekne', base: 450, inc: 9, d: 'Kıyıda oltalarını bırakır.' },
+  { n: 'Trol Teknesi', base: 5000, inc: 75, d: 'Ağlarla sürekli balık toplar.' },
+  { n: 'Balıkçı Gemisi', base: 60000, inc: 620, d: 'Açık denizde gece gündüz çalışır.' },
+  { n: 'Dev Fabrika Gemisi', base: 800000, inc: 5000, d: 'Balığı gemide işler.' }
+];
+
+/* ================= oyun durumu ================= */
+const defaultState = () => ({
+  money: 0, totalEarned: 0, totalFish: 0, crits: 0, netCasts: 0, goldCaught: 0, nightCatch: 0,
+  rodLv: 1, bait: 0, critLv: 0, lantern: 0, morning: 0,
+  gens: GEN.map(() => 0), spotsUnlocked: [true, false, false], spot: 0,
+  species: {}, ach: {}, gameMin: 360, day: 1, muted: false, netReadyAt: 0, saved: Date.now()
+});
+let S = defaultState();
+let loadedFromSave = false;
+try {
+  const raw = localStorage.getItem(KEY);
+  if (raw) {
+    const d = JSON.parse(raw);
+    S = Object.assign(defaultState(), d);
+    S.gens = GEN.map((_, i) => +(d.gens && d.gens[i]) || 0);
+    S.spotsUnlocked = [true, !!(d.spotsUnlocked && d.spotsUnlocked[1]), !!(d.spotsUnlocked && d.spotsUnlocked[2])];
+    S.species = d.species || {};
+    S.ach = d.ach || {};
+    S.rodLv = clamp(Math.floor(+S.rodLv || 1), 1, ROD.length);
+    if (!S.spotsUnlocked[S.spot]) S.spot = 0;
+    ['money', 'totalEarned', 'gameMin', 'day'].forEach(k => { if (!isFinite(S[k])) S[k] = defaultState()[k]; });
+    loadedFromSave = true;
+  }
+} catch (e) { S = defaultState(); }
+let resetting = false;
+function save() { if (resetting) return; try { S.saved = Date.now(); localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } }
+
+/* ================= hesaplar ================= */
+const hourOf = () => S.gameMin / 60;
+const inRange = (h, r) => r[0] <= r[1] ? (h >= r[0] && h < r[1]) : (h >= r[0] || h < r[1]);
+const inHours = (f, h) => !f.hours || f.hours.some(r => inRange(h, r));
+const isNight = h => inRange(h, [21, 5]);
+const isMorning = h => inRange(h, [5, 11]);
+const periodName = h => isMorning(h) ? 'Sabah' : inRange(h, [11, 17]) ? 'Öğle' : inRange(h, [17, 21]) ? 'Akşam' : 'Gece';
+const speciesCount = () => Object.keys(S.species).filter(k => S.species[k] > 0).length;
+const achCount = () => Object.keys(S.ach).length;
+const globalMult = () => 1 + 0.02 * achCount();
+const rodMult = () => ROD[S.rodLv - 1].mult;
+const perSec = () => GEN.reduce((a, g, i) => a + S.gens[i] * g.inc, 0) * globalMult();
+const netTier = () => S.rodLv >= 9 ? 3 : S.rodLv >= 6 ? 2 : S.rodLv >= 3 ? 1 : 0;
+function addMoney(v) { S.money += v; S.totalEarned += v; }
+const upgCost = u => Math.round(u.base * Math.pow(u.g, S[u.key]));
+const genCost = (g, i) => Math.ceil(g.base * Math.pow(1.15, S.gens[i]));
+function hoursText(f) {
+  if (!f.hours) return 'Her saat';
+  return f.hours.map(r => `${pad2(r[0])}:00–${pad2(r[1])}:00`).join(' / ');
+}
+
+function weightOf(f, h) {
+  let w = RARITY[f.rar].w;
+  const L = S.bait;
+  w *= [1, 1 + 0.1 * L, 1 + 0.25 * L, 1 + 0.5 * L, 1][f.rar];
+  if (f.hours) {
+    if (isNight(h)) w *= 1 + 0.3 * S.lantern;
+    if (isMorning(h)) w *= 1 + 0.3 * S.morning;
+  }
+  return w;
+}
+function rollFish(spot = S.spot, h = hourOf()) {
+  let pool = FISH.filter(f => f.spot === spot && inHours(f, h));
+  if (!pool.length) pool = FISH.filter(f => f.spot === spot);
+  let tot = 0;
+  const ws = pool.map(f => { const w = weightOf(f, h); tot += w; return w; });
+  let r = Math.random() * tot;
+  for (let i = 0; i < pool.length; i++) { r -= ws[i]; if (r <= 0) return pool[i]; }
+  return pool[pool.length - 1];
+}
+
+/* ================= toast ================= */
+function toast(msg, cls = '') {
+  const box = $('#toasts');
+  const d = document.createElement('div');
+  d.className = 'toast ' + cls; d.textContent = msg; box.appendChild(d);
+  setTimeout(() => d.classList.add('out'), 3000);
+  setTimeout(() => d.remove(), 3500);
+  while (box.children.length > 5) box.firstChild.remove();
+}
+
+/* ================= ses (8-bit) ================= */
+const Snd = {
+  ctx: null,
+  init() {
+    try {
+      if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+    } catch (e) { }
+  },
+  tone(freq, dur = 0.1, type = 'square', vol = 0.05, slideTo = null, delay = 0) {
+    if (S.muted || !this.ctx) return;
+    try {
+      const t0 = this.ctx.currentTime + delay;
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t0);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+      g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(t0); o.stop(t0 + dur + 0.03);
+    } catch (e) { }
+  },
+  noise(dur = 0.15, vol = 0.05, delay = 0) {
+    if (S.muted || !this.ctx) return;
+    try {
+      const n = Math.floor(this.ctx.sampleRate * dur);
+      const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      const s = this.ctx.createBufferSource(), g = this.ctx.createGain();
+      s.buffer = buf; g.gain.value = vol; s.connect(g); g.connect(this.ctx.destination);
+      s.start(this.ctx.currentTime + delay);
+    } catch (e) { }
+  },
+  cast() { this.noise(0.08, 0.04); this.tone(520, 0.07, 'square', 0.04, 220); },
+  coin() { this.tone(988, 0.06); this.tone(1319, 0.18, 'square', 0.05, null, 0.06); },
+  rare(r) { [523, 659, 784, 1047, 1319].slice(0, 3 + r).forEach((f, i) => this.tone(f, 0.11, 'square', 0.05, null, i * 0.09)); },
+  buy() { [440, 554, 659].forEach((f, i) => this.tone(f, 0.09, 'square', 0.05, null, i * 0.07)); },
+  err() { this.tone(150, 0.16, 'sawtooth', 0.05, 90); },
+  crit() { this.tone(1200, 0.06, 'square', 0.04); this.tone(1700, 0.1, 'square', 0.04, null, 0.05); },
+  ach() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => this.tone(f, 0.12, 'square', 0.05, null, i * 0.1)); },
+  net() { this.noise(0.4, 0.05); this.tone(320, 0.35, 'triangle', 0.06, 90); },
+  goldAlert() { [1047, 1319, 1568, 2093].forEach((f, i) => this.tone(f, 0.1, 'triangle', 0.05, null, i * 0.08)); },
+  gold() { [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => this.tone(f, 0.12, 'square', 0.05, null, i * 0.07)); }
+};
+
+/* ================= pikseller (sprite) ================= */
+function buildSprite(rows, pal, sil) {
+  const h = rows.length, w = Math.max(...rows.map(r => r.length));
+  const make = flip => {
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d');
+    for (let y = 0; y < h; y++) {
+      const row = rows[y];
+      for (let x = 0; x < row.length; x++) {
+        const ch = row[x]; if (ch === '.') continue;
+        const col = sil || (ch === 'w' ? '#ffffff' : ch === 'k' ? '#111111' : pal[ch]);
+        if (!col) continue;
+        g.fillStyle = col; g.fillRect(flip ? w - 1 - x : x, y, 1, 1);
+      }
+    }
+    return c;
+  };
+  return { r: make(false), l: make(true), w, h };
+}
+const SPR = {}, SIL = {};
+FISH.forEach(f => { SPR[f.id] = buildSprite(TPL[f.tpl], f.pal); SIL[f.id] = buildSprite(TPL[f.tpl], f.pal, '#39406e'); });
+function drawSpr(g, spr, x, y, right = true, alpha = 1) {
+  if (alpha !== 1) g.globalAlpha = alpha;
+  g.drawImage(right ? spr.r : spr.l, Math.round(x - spr.w / 2), Math.round(y - spr.h / 2));
+  if (alpha !== 1) g.globalAlpha = 1;
+}
+
+/* ================= gökyüzü ve renkler ================= */
+const SKY = [
+  [0, '#070b24', '#16204a', 0], [4.5, '#0b1236', '#2a2a60', 0.02], [5.7, '#2a2a6a', '#e0907a', 0.25],
+  [7, '#4f8fd8', '#ffcf9a', 0.65], [9, '#3f93e6', '#a8dcff', 1], [15, '#3a8ee0', '#b0e0ff', 1],
+  [17.5, '#4a7ccc', '#ffc27a', 0.85], [19, '#4a3a8a', '#ff8a50', 0.4], [20.5, '#1c1a4a', '#6a3a6a', 0.1],
+  [22, '#0a0f2c', '#1c2552', 0], [24, '#070b24', '#16204a', 0]
+].map(k => ({ h: k[0], top: hex(k[1]), bot: hex(k[2]), dl: k[3] }));
+function skyAt(h) {
+  let i = 0;
+  while (i < SKY.length - 2 && h >= SKY[i + 1].h) i++;
+  const a = SKY[i], b = SKY[i + 1], t = clamp((h - a.h) / (b.h - a.h), 0, 1);
+  return { top: mix(a.top, b.top, t), bot: mix(a.bot, b.bot, t), dl: lerp(a.dl, b.dl, t) };
+}
+const W_DAY_T = hex('#35a8dc'), W_DAY_B = hex('#0c4f82'), W_NIT_T = hex('#0d2a4c'), W_NIT_B = hex('#030d1e');
+function waterCols(sky, spot) {
+  const tint = SPOTS[spot].tint;
+  let t = mix(W_NIT_T, W_DAY_T, sky.dl), b = mix(W_NIT_B, W_DAY_B, sky.dl);
+  t = mix(t, sky.bot, 0.15);
+  const ap = c => [clamp(c[0] * tint[0], 0, 255), clamp(c[1] * tint[1], 0, 255), clamp(c[2] * tint[2], 0, 255)];
+  return { top: ap(t), bot: ap(b) };
+}
+
+/* ================= çizim yardımcıları ================= */
+function disc(g, cx, cy, r, col) {
+  g.fillStyle = col;
+  for (let dy = -r; dy <= r; dy++) { const dx = Math.floor(Math.sqrt(r * r - dy * dy)); g.fillRect(Math.round(cx - dx), Math.round(cy + dy), dx * 2 + 1, 1); }
+}
+function plotLine(g, x0, y0, x1, y1, w = 1) {
+  const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+  for (let i = 0; i <= n; i++) g.fillRect(Math.round(lerp(x0, x1, i / n)), Math.round(lerp(y0, y1, i / n)), w, w);
+}
+function ctext(g, txt, x, y, col, size = 8) {
+  g.font = `${size}px "Press Start 2P", monospace`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = '#000'; g.fillText(txt, x + 1, y + 1);
+  g.fillStyle = col; g.fillText(txt, x, y);
+}
+function pine(g, x, base, h, col, trunk) {
+  g.fillStyle = trunk; g.fillRect(x - 1, base - 3, 3, 3);
+  g.fillStyle = col;
+  const layers = Math.max(3, Math.round(h / 4));
+  for (let i = 0; i < layers; i++) { const w = 3 + i * 2; g.fillRect(x - (w >> 1), base - 3 - h + i * 4, w, 5); }
+}
+function cloud(g, x, y, s, col) {
+  g.fillStyle = col;
+  g.fillRect(Math.round(x + 4 * s), Math.round(y), 12 * s, 3 * s);
+  g.fillRect(Math.round(x), Math.round(y + 3 * s), 24 * s, 3 * s);
+  g.fillRect(Math.round(x + 2 * s), Math.round(y + 6 * s), 18 * s, 2 * s);
+}
+function hillY(base, amp, f1, f2, ph, x) { return Math.round(base - (Math.sin(x * f1 + ph) * 0.6 + Math.sin(x * f2 + ph * 1.7) * 0.4 + 1) * amp * 0.5); }
+function hills(g, col, base, amp, f1, f2, ph, x0 = 0, x1 = W) {
+  g.fillStyle = col;
+  for (let x = x0; x < x1; x++) { const y = hillY(base, amp, f1, f2, ph, x); g.fillRect(x, y, 1, HOR - y); }
+}
+function rock(g, x, y, w, h, col, hi) {
+  g.fillStyle = col;
+  g.fillRect(x + 1, y, w - 2, 1); g.fillRect(x, y + 1, w, Math.max(1, h - 2)); g.fillRect(x + 1, y + h - 1, w - 2, 1);
+  g.fillStyle = hi; g.fillRect(x + 2, y + 1, Math.max(1, w >> 1), 1);
+}
+
+const STARS = Array.from({ length: 46 }, (_, i) => ({ x: Math.floor(((i * 97 + 13) % 313)), y: Math.floor((i * 53 + 7) % (HOR - 8)), p: i * 1.7, big: i % 7 === 0 }));
+const CLOUDS = [{ x: 20, y: 12, v: 3, s: 2 }, { x: 150, y: 30, v: 2, s: 1 }, { x: 250, y: 8, v: 4, s: 1 }, { x: 90, y: 40, v: 1.5, s: 1 }];
+
+function drawSky(g, sky, h, t) {
+  const bands = 18, bh = Math.ceil(HOR / bands);
+  for (let i = 0; i < bands; i++) { g.fillStyle = css(mix(sky.top, sky.bot, i / (bands - 1))); g.fillRect(0, i * bh, W, bh + 1); }
+  const na = clamp(1 - sky.dl * 1.6, 0, 1);
+  if (na > 0.02) for (const s of STARS) {
+    const a = na * (0.5 + 0.5 * Math.sin(t * 1.7 + s.p));
+    g.fillStyle = `rgba(255,255,255,${a.toFixed(2)})`; g.fillRect(s.x, s.y, s.big ? 2 : 1, s.big ? 2 : 1);
+  }
+  if (h >= 5.3 && h <= 19.2) {
+    const u = (h - 5.3) / (19.2 - 5.3), x = 18 + u * 284, y = HOR - 6 - Math.sin(u * Math.PI) * 52;
+    const low = 1 - Math.sin(u * Math.PI);
+    const col = mix(hex('#fff4b0'), hex('#ff8a3a'), clamp(low * 1.4, 0, 1));
+    g.globalAlpha = 0.22; disc(g, x, y, 12, css(col)); g.globalAlpha = 1;
+    disc(g, x, y, 8, css(col));
+  }
+  if (h >= 18 || h < 6.5) {
+    const u = clamp(((h - 18 + 24) % 24) / 12.5, 0, 1), x = 18 + u * 284, y = HOR - 6 - Math.sin(u * Math.PI) * 48;
+    g.globalAlpha = na; disc(g, x, y, 7, '#e6eaff');
+    g.fillStyle = '#c4cae8'; g.fillRect(Math.round(x - 3), Math.round(y - 2), 2, 2); g.fillRect(Math.round(x + 1), Math.round(y + 2), 2, 2);
+    g.globalAlpha = 1;
+  }
+  const cc = css(mix(mix([70, 80, 120], [250, 250, 255], sky.dl), sky.bot, 0.2));
+  for (const c of CLOUDS) cloud(g, ((c.x + t * c.v) % (W + 70)) - 40, c.y, c.s, cc);
+}
+
+function drawLand(g, sky, spot, t) {
+  const f = 0.35 + 0.65 * sky.dl;
+  if (spot === 0) {
+    hills(g, css(dark(mix(hex('#6a8aa8'), sky.bot, 0.35), f)), HOR - 2, 30, 0.02, 0.05, 1);
+    hills(g, css(dark(hex('#3f7a46'), f)), HOR, 22, 0.03, 0.07, 3, 150, W);
+    for (const [x, h] of [[168, 20], [190, 26], [214, 18], [238, 24], [262, 20], [290, 27], [310, 17]]) {
+      pine(g, x, hillY(HOR, 22, 0.03, 0.07, 3, x) + 3, h, css(dark(hex('#245a34'), f)), css(dark(hex('#4a3020'), f)));
+    }
+  } else if (spot === 1) {
+    hills(g, css(dark(mix(hex('#8a8a9a'), sky.bot, 0.3), f)), HOR - 4, 40, 0.035, 0.09, 2);
+    hills(g, css(dark(hex('#6a5a48'), f)), HOR, 24, 0.045, 0.11, 5, 130, W);
+    hills(g, css(dark(hex('#4a6a3a'), f)), HOR, 10, 0.06, 0.12, 7, 0, 90);
+    for (const [x, h] of [[150, 16], [186, 20], [228, 14], [270, 18], [305, 15]]) {
+      pine(g, x, hillY(HOR, 24, 0.045, 0.11, 5, x) + 3, h, css(dark(hex('#2a5a30'), f)), css(dark(hex('#4a3020'), f)));
+    }
+  } else {
+    hills(g, css(dark(mix(hex('#5a7a9a'), sky.bot, 0.45), f)), HOR, 12, 0.03, 0.08, 4, 40, 120);
+    // fener
+    const lx = 276;
+    g.fillStyle = css(dark(hex('#e8e8f0'), f)); g.fillRect(lx, HOR - 30, 8, 30);
+    g.fillStyle = css(dark(hex('#d84040'), f)); g.fillRect(lx, HOR - 24, 8, 5); g.fillRect(lx, HOR - 12, 8, 5);
+    g.fillStyle = css(dark(hex('#303848'), f)); g.fillRect(lx - 1, HOR - 34, 10, 4); g.fillRect(lx + 2, HOR - 38, 4, 4);
+    const glow = (1 - sky.dl) * (0.5 + 0.5 * Math.sin(t * 2));
+    if (glow > 0.05) { g.fillStyle = `rgba(255,240,150,${(0.55 * glow).toFixed(2)})`; g.fillRect(lx + 2, HOR - 37, 4, 3); g.fillStyle = `rgba(255,240,150,${(0.14 * glow).toFixed(2)})`; g.fillRect(lx - 70, HOR - 37, 70, 3); }
+    // yelkenli
+    const bx = ((t * 4) % (W + 60)) - 30, by = HOR - 2;
+    g.fillStyle = css(dark(hex('#5a3a20'), f)); g.fillRect(Math.round(bx - 5), by, 11, 2);
+    g.fillStyle = css(dark(hex('#f0f0f0'), f));
+    for (let i = 0; i < 8; i++) g.fillRect(Math.round(bx - 1), by - 1 - i, Math.max(1, 6 - (i >> 1) * 2 + 1 - (i > 5 ? 1 : 0)), 1);
+  }
+}
+
+function drawWater(g, y0, y1, wc, t, dl) {
+  const bh = 4, n = Math.ceil((y1 - y0) / bh);
+  for (let i = 0; i < n; i++) { g.fillStyle = css(mix(wc.top, wc.bot, Math.pow(i / Math.max(1, n - 1), 0.8)), 5); g.fillRect(0, y0 + i * bh, W, bh + 1); }
+  g.fillStyle = `rgba(255,255,255,${(0.12 + 0.3 * dl).toFixed(2)})`; g.fillRect(0, y0, W, 1);
+  for (let i = 0; i < 22; i++) {
+    const x = ((i * 47 + t * (6 + (i % 4) * 3)) % (W + 10)) - 5, y = y0 + 2 + ((i * 13) % 16), w = 3 + (i % 3) * 2;
+    g.fillStyle = `rgba(255,255,255,${(0.07 + 0.13 * dl).toFixed(2)})`; g.fillRect(Math.round(x), y, w, 1);
+  }
+}
+function drawRays(g, y0, t, dl) {
+  if (dl < 0.25) return;
+  g.fillStyle = `rgba(255,255,255,${(0.05 * dl).toFixed(3)})`;
+  for (let r = 0; r < 4; r++) {
+    const bx = 70 + r * 75, ph = r * 1.9;
+    for (let y = y0; y < H - 22; y += 4) g.fillRect(Math.round(bx + (y - y0) * 0.3 + Math.sin(t * 0.3 + ph) * 8), y, Math.max(2, 14 - Math.floor((y - y0) / 14)), 4);
+  }
+}
+const DECOR = [
+  { weed: [[40, 9], [66, 12], [104, 8], [150, 11], [205, 9], [262, 12], [298, 8]], rocks: [[118, 7, 5], [228, 9, 6]], coral: [] },
+  { weed: [[70, 7], [190, 8], [285, 7]], rocks: [[30, 10, 6], [88, 8, 5], [150, 12, 7], [215, 9, 6], [268, 11, 7]], coral: [] },
+  { weed: [[82, 12], [168, 14], [245, 11]], rocks: [[26, 8, 5], [300, 9, 6]], coral: [[52, '#ff7aa8'], [128, '#ffa24a'], [205, '#c470ff'], [272, '#ff6a6a']] }
+];
+const SAND = [hex('#d2bb82'), hex('#8d7d60'), hex('#dcc88e')];
+const ROCKC = [hex('#6a7078'), hex('#7a6a58'), hex('#808890')];
+function drawSeabed(g, spot, t, dl, y0) {
+  const f = 0.3 + 0.7 * dl, sand = css(dark(SAND[spot], f * 0.85)), sandL = css(dark(mix(SAND[spot], [255, 255, 255], 0.2), f * 0.85));
+  for (let x = 0; x < W; x++) {
+    const y = y0 + Math.round(Math.sin(x * 0.05) * 2 + Math.sin(x * 0.13) * 1.5);
+    g.fillStyle = sand; g.fillRect(x, y, 1, H - y);
+    g.fillStyle = sandL; g.fillRect(x, y, 1, 2);
+  }
+  const D = DECOR[spot];
+  for (const [bx, len] of D.weed) {
+    for (let j = 0; j < len; j++) {
+      const x = bx + Math.round(Math.sin(t * 1.4 + bx * 0.1 + j * 0.5) * (j * 0.28)), y = y0 + 1 - j * 3;
+      g.fillStyle = css(dark(mix(hex('#2f8a4a'), hex('#6acf6a'), j / len), f)); g.fillRect(x, y, 2, 3);
+    }
+  }
+  for (const [x, w, h] of D.rocks) rock(g, x, y0 - h + 4, w, h, css(dark(ROCKC[spot], f)), css(dark(mix(ROCKC[spot], [255, 255, 255], 0.3), f)));
+  for (const [x, col] of D.coral) {
+    g.fillStyle = css(dark(hex(col), f));
+    g.fillRect(x, y0 - 12, 3, 14); g.fillRect(x - 5, y0 - 9, 3, 6); g.fillRect(x - 5, y0 - 11, 2, 3);
+    g.fillRect(x + 6, y0 - 10, 3, 7); g.fillRect(x + 7, y0 - 13, 2, 4); g.fillRect(x - 1, y0 - 15, 2, 4);
+  }
+}
+
+/* ================= sahne nesneleri ================= */
+const stage = $('#stage'), g = stage.getContext('2d');
+const rod = { kick: 0, bump: 0 };
+const ripples = [], parts = [], texts = [], arcs = [], bubbles = [];
+let amb = [];
+const GOLD = { on: false, x: 0, y: 0, vx: 0, t: 0, by: 0, timer: rand(60, 110) };
+
+function spawnAmb(first) {
+  const f = rollFish(S.spot, hourOf()), dir = Math.random() < 0.5 ? 1 : -1;
+  amb.push({ f, x: first ? rand(20, W - 20) : (dir > 0 ? -30 : W + 30), by: rand(HOR + 16, H - 38), vx: dir * rand(8, 22), ph: rand(0, 6), y: 0 });
+}
+function resetAmb() { amb = []; for (let i = 0; i < 6; i++) spawnAmb(true); }
+function splash(x, y) {
+  for (let i = 0; i < 8; i++) parts.push({ x, y, vx: rand(-26, 26), vy: rand(-62, -24), life: 0, max: rand(0.4, 0.7), col: pick2(['#bfe9ff', '#ffffff', '#6ac0f0']), s: 1 });
+}
+const pick2 = a => a[Math.floor(Math.random() * a.length)];
+function burst(x, y, cols, n = 8) {
+  for (let i = 0; i < n; i++) parts.push({ x, y, vx: rand(-45, 45), vy: rand(-70, -10), life: 0, max: rand(0.5, 0.9), col: pick2(cols), s: 2 });
+}
+function floatText(x, y, txt, col, size = 8) { texts.push({ x, y, txt, col, life: 0, max: 1.1, size }); }
+
+function drawPierAndRod(gg, sky, t) {
+  const f = 0.45 + 0.55 * sky.dl;
+  const wood = css(dark(hex('#9a6a34'), f)), woodL = css(dark(hex('#b88444'), f)), woodD = css(dark(hex('#6a4420'), f));
+  gg.globalAlpha = 0.75; gg.fillStyle = woodD; gg.fillRect(8, HOR, 4, 30); gg.fillRect(52, HOR, 4, 30); gg.globalAlpha = 1;
+  gg.fillStyle = wood; gg.fillRect(0, HOR - 5, 70, 5);
+  gg.fillStyle = woodL; gg.fillRect(0, HOR - 5, 70, 1);
+  gg.fillStyle = woodD; for (let x = 10; x < 70; x += 10) gg.fillRect(x, HOR - 4, 1, 4);
+  gg.fillRect(60, HOR - 13, 2, 8); gg.fillRect(56, HOR - 12, 10, 1);
+  // kova
+  const by = HOR - 15 + Math.round(rod.bump * 2);
+  gg.fillStyle = css(dark(hex('#7a8aa0'), f)); gg.fillRect(BUCKX - 7, by, 14, 10);
+  gg.fillStyle = css(dark(hex('#a8b8cc'), f)); gg.fillRect(BUCKX - 8, by, 16, 2);
+  gg.fillStyle = css(dark(hex('#4a5a70'), f)); gg.fillRect(BUCKX - 7, by + 4, 14, 1); gg.fillRect(BUCKX - 6, by + 9, 12, 1);
+  gg.fillStyle = css(dark(hex('#c8d4e4'), f)); gg.fillRect(BUCKX - 9, by - 3, 1, 4); gg.fillRect(BUCKX + 8, by - 3, 1, 4); gg.fillRect(BUCKX - 8, by - 4, 16, 1);
+  // olta
+  const bx0 = 46, by0 = HOR - 8, a = -0.95 - rod.kick * 0.3, L = 58, bend = 3 + rod.kick * 9;
+  gg.fillStyle = css(dark(hex('#5a3a20'), f)); gg.fillRect(bx0 - 3, by0 + 1, 7, 2); gg.fillRect(bx0 + 2, by0 - 1, 2, 3);
+  gg.fillStyle = ROD[S.rodLv - 1].col;
+  let tipx = bx0, tipy = by0;
+  for (let i = 0; i <= 60; i++) {
+    const u = i / 60, x = bx0 + Math.cos(a) * L * u, y = by0 + Math.sin(a) * L * u + bend * u * u;
+    gg.fillRect(Math.round(x), Math.round(y), u < 0.35 ? 2 : 1, u < 0.35 ? 2 : 1); tipx = x; tipy = y;
+  }
+  // misina + şamandıra
+  const dip = Math.round(rod.kick * 4), bobY = HOR - 1 + dip + Math.round(Math.sin(t * 2) * 0.8);
+  gg.fillStyle = 'rgba(235,235,235,0.85)';
+  for (let i = 0; i <= 70; i++) { const u = i / 70; gg.fillRect(Math.round(lerp(tipx, BOBX, u)), Math.round(lerp(tipy, bobY, u) + Math.sin(u * Math.PI) * 6), 1, 1); }
+  gg.fillStyle = '#e03a3a'; gg.fillRect(BOBX - 2, bobY - 3, 4, 2);
+  gg.fillStyle = '#ffffff'; gg.fillRect(BOBX - 2, bobY - 1, 4, 2);
+  gg.fillStyle = '#7a1a1a'; gg.fillRect(BOBX - 1, bobY - 4, 2, 1);
+  for (const r of ripples) { gg.fillStyle = `rgba(255,255,255,${(0.6 * (1 - r.t)).toFixed(2)})`; const w = 4 + r.t * 34; gg.fillRect(Math.round(BOBX - w / 2), HOR + 1, Math.round(w), 1); gg.fillRect(Math.round(BOBX - w / 3), HOR + 3, Math.round(w * 0.66), 1); }
+}
+
+function render(t) {
+  const h = hourOf(), sky = skyAt(h), wc = waterCols(sky, S.spot);
+  drawSky(g, sky, h, t);
+  drawLand(g, sky, S.spot, t);
+  drawWater(g, HOR, H, wc, t, sky.dl);
+  drawRays(g, HOR, t, sky.dl);
+  drawSeabed(g, S.spot, t, sky.dl, H - 20);
+  for (const a of amb) drawSpr(g, SPR[a.f.id], a.x, a.y, a.vx > 0, 0.55 + 0.35 * sky.dl);
+  for (const b of bubbles) { g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(Math.round(b.x), Math.round(b.y), 2, 2); g.fillStyle = 'rgba(255,255,255,0.7)'; g.fillRect(Math.round(b.x), Math.round(b.y), 1, 1); }
+  if (GOLD.on) {
+    const gl = 0.22 + 0.14 * Math.sin(t * 8);
+    g.globalAlpha = gl; disc(g, GOLD.x, GOLD.y, 14, '#ffe27a'); g.globalAlpha = 1;
+    drawSpr(g, SPR.altin, GOLD.x, GOLD.y, GOLD.vx > 0);
+    for (let i = 0; i < 5; i++) { const ang = t * 3 + i * 1.26, r = 12 + 3 * Math.sin(t * 5 + i); g.fillStyle = (i + Math.floor(t * 6)) % 2 ? '#ffffff' : '#ffe27a'; g.fillRect(Math.round(GOLD.x + Math.cos(ang) * r), Math.round(GOLD.y + Math.sin(ang) * r * 0.7), 2, 2); }
+  }
+  drawPierAndRod(g, sky, t);
+  for (const a of arcs) {
+    const u = clamp(a.t / a.dur, 0, 1), x = lerp(a.x0, a.x1, u), y = lerp(a.y0, a.y1, u) - 160 * u * (1 - u);
+    drawSpr(g, SPR[a.f.id], x, y, false);
+  }
+  for (const p of parts) { g.globalAlpha = clamp(1 - p.life / p.max, 0, 1); g.fillStyle = p.col; g.fillRect(Math.round(p.x), Math.round(p.y), p.s, p.s); }
+  g.globalAlpha = 1;
+  for (const tx of texts) { g.globalAlpha = clamp(1.6 - tx.life / tx.max * 1.6 + 0.2, 0, 1); ctext(g, tx.txt, Math.round(tx.x), Math.round(tx.y), tx.col, tx.size); }
+  g.globalAlpha = 1;
+}
+
+/* ================= tıklama / yakalama ================= */
+let dexDirty = true;
+function spawnArc(f, v, crit) {
+  arcs.push({ f, v, crit, t: 0, dur: 0.75, x0: BOBX, y0: HOR, x1: BUCKX, y1: HOR - 14 });
+  if (arcs.length > 14) arcs.shift();
+}
+function registerCatch(f) {
+  const isNew = !S.species[f.id];
+  S.totalFish++; S.species[f.id] = (S.species[f.id] || 0) + 1;
+  if (f.hours && isNight(hourOf())) S.nightCatch++;
+  if (isNew) { toast(`Yeni balık: ${f.name}`, 'good'); }
+  if (f.rar >= 3 && f.rar < 4) toast(`${RARITY[f.rar].n}: ${f.name}!`, 'gold');
+  dexDirty = true;
+}
+function doClick() {
+  const f = rollFish();
+  let v = f.value * rodMult() * globalMult();
+  const crit = Math.random() < 0.05 + 0.02 * S.critLv;
+  if (crit) { v *= 5; S.crits++; Snd.crit(); }
+  addMoney(v);
+  registerCatch(f);
+  rod.kick = 1; ripples.push({ t: 0 });
+  splash(BOBX, HOR);
+  Snd.cast();
+  spawnArc(f, v, crit);
+  checkAch();
+}
+function onLand(a) {
+  rod.bump = 1;
+  const col = a.crit ? '#ff7a5a' : RARITY[a.f.rar].c;
+  if (a.crit) floatText(BUCKX + 10, HOR - 30, 'KRİTİK!', '#ff7a5a', 8);
+  floatText(BUCKX + 4, HOR - 22, `+₺${fmt(a.v)}`, col, 8);
+  burst(BUCKX, HOR - 14, ['#ffd166', '#fff2a0', '#ffffff'], a.f.rar >= 2 ? 14 : 5);
+  if (a.f.rar >= 2) Snd.rare(a.f.rar); else Snd.coin();
+}
+function spawnGold() {
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  GOLD.on = true; GOLD.x = dir > 0 ? -20 : W + 20; GOLD.vx = dir * 34; GOLD.by = rand(HOR + 22, H - 52); GOLD.y = GOLD.by; GOLD.t = 0;
+  toast('Suda altın bir parıltı! Hızlıca tıkla!', 'gold'); Snd.goldAlert();
+}
+function catchGold() {
+  const v = Math.max(250 * rodMult() * globalMult(), perSec() * 90);
+  addMoney(v);
+  S.goldCaught++; S.totalFish++; S.species.altin = (S.species.altin || 0) + 1;
+  GOLD.on = false; GOLD.timer = rand(70, 130);
+  burst(GOLD.x, GOLD.y, ['#ffd166', '#fff2a0', '#ffffff', '#ff9a1f'], 30);
+  floatText(W / 2, 60, 'ALTIN BALIK!', '#ffd166', 10);
+  floatText(W / 2, 76, `+₺${fmt(v)}`, '#ffffff', 10);
+  toast(`Altın balık yakalandı! +₺${fmt(v)}`, 'gold');
+  Snd.gold(); dexDirty = true; checkAch();
+}
+function pointerOnStage(e) {
+  Snd.init();
+  if (NET.on) return;
+  const r = stage.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+  if (GOLD.on && Math.abs(x - GOLD.x) <= 15 && Math.abs(y - GOLD.y) <= 11) catchGold(); else doClick();
+}
+stage.addEventListener('pointerdown', e => { e.preventDefault(); pointerOnStage(e); });
+document.addEventListener('keydown', e => {
+  Snd.init();
+  if (e.code === 'Space' && !e.repeat && !/^(BUTTON|TEXTAREA|INPUT)$/.test(e.target.tagName)) { e.preventDefault(); if (!NET.on) doClick(); }
+});
+document.addEventListener('pointerdown', () => Snd.init(), { once: true });
+
+/* ================= ağ atma ================= */
+const netCv = $('#netCanvas'), ng = netCv.getContext('2d');
+const NET = { on: false, phase: 'idle', t: 0, fish: [], caught: [], mx: 160, my: 100, sx: 120, sy: 95, sdir: 1, castT: 0, resT: 0, total: 0, T: null, bub: [] };
+function netOpen() {
+  const tier = netTier();
+  if (!tier || NET.on) return;
+  if (Date.now() < S.netReadyAt) { Snd.err(); return; }
+  const T = NET_TIERS[tier];
+  Object.assign(NET, { on: true, phase: 'aim', t: 0, T, caught: [], sx: 120, sdir: 1, sy: 95, castT: 0, resT: 0, total: 0, mx: 160, my: 100, fish: [] });
+  for (let i = 0; i < T.max + 4; i++) {
+    NET.fish.push({ f: rollFish(), ox: (Math.random() + Math.random() - 1) * T.R * 0.9, oy: (Math.random() + Math.random() - 1) * T.R * 0.7, ph: rand(0, 6), x: 160, y: 90, dir: 1, taken: false, x0: 0, y0: 0 });
+  }
+  $('#netOverlay').hidden = false;
+  $('#netCancel').textContent = 'VAZGEÇ'; $('#netCancel').classList.remove('cant');
+  $('#netInfo').textContent = `Fare ile nişan al ve sürüye tıkla! Bu kademede ağa ${T.min}–${T.max} balık girer. Ağ balıkları normal balıktan ×${T.mult} değerlidir.`;
+}
+function netClose() { NET.on = false; NET.phase = 'idle'; $('#netOverlay').hidden = true; }
+function netCast() {
+  if (NET.phase !== 'aim') return;
+  const R = NET.T.R, inside = NET.fish.filter(o => Math.hypot(o.x - NET.mx, o.y - NET.my) <= R);
+  const take = shuffle(inside).slice(0, randInt(NET.T.min, NET.T.max));
+  take.forEach(o => { o.taken = true; o.x0 = o.x; o.y0 = o.y; });
+  NET.caught = take; NET.cx = NET.mx; NET.cy = NET.my; NET.phase = 'cast'; NET.castT = 0;
+  $('#netCancel').classList.add('cant');
+  Snd.net();
+}
+function netFinish() {
+  let total = 0;
+  for (const o of NET.caught) { total += o.f.value * rodMult() * globalMult() * NET.T.mult; registerCatch(o.f); }
+  addMoney(total); S.netCasts++; NET.total = total;
+  S.netReadyAt = Date.now() + (NET.caught.length ? NET.T.cd : NET.T.cd * 0.4) * 1000;
+  NET.phase = 'result'; NET.resT = 0;
+  $('#netCancel').textContent = 'DEVAM'; $('#netCancel').classList.remove('cant');
+  if (NET.caught.length) { Snd.coin(); if (NET.caught.some(o => o.f.rar >= 2)) Snd.rare(2); }
+  checkAch();
+}
+function netUpdate(dt) {
+  NET.t += dt;
+  NET.sx += NET.sdir * 22 * dt;
+  if (NET.sx > 250) NET.sdir = -1; if (NET.sx < 70) NET.sdir = 1;
+  NET.sy = 95 + Math.sin(NET.t * 0.8) * 22;
+  for (const o of NET.fish) {
+    if (o.taken && NET.phase !== 'aim') continue;
+    o.x = NET.sx + o.ox + Math.sin(NET.t * 1.6 + o.ph) * 5; o.y = NET.sy + o.oy + Math.cos(NET.t * 1.3 + o.ph) * 4; o.dir = NET.sdir;
+  }
+  if (NET.phase === 'cast') {
+    NET.castT += dt;
+    const u = clamp(NET.castT / 0.9, 0, 1), e = u * u * (3 - 2 * u);
+    for (const o of NET.caught) { o.x = lerp(o.x0, NET.cx, e); o.y = lerp(o.y0, NET.cy, e); }
+    if (u >= 1) netFinish();
+  } else if (NET.phase === 'result') {
+    NET.resT += dt;
+    if (NET.resT > 3.5) netClose();
+  }
+  if (Math.random() < dt * 4) NET.bub.push({ x: rand(10, W - 10), y: H - 22, vy: rand(8, 18), ph: rand(0, 6) });
+  for (const b of NET.bub) { b.y -= b.vy * dt; b.x += Math.sin(NET.t * 2 + b.ph) * 4 * dt; }
+  NET.bub = NET.bub.filter(b => b.y > 4);
+}
+function dotCircle(gg, cx, cy, r, col, step) {
+  gg.fillStyle = col;
+  const n = Math.max(12, Math.floor(2 * Math.PI * r / step));
+  for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; gg.fillRect(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), 2, 2); }
+}
+function netDraw() {
+  const h = hourOf(), sky = skyAt(h), wc = waterCols(sky, S.spot), t = NET.t;
+  drawWater(ng, 0, H, wc, t, sky.dl);
+  drawRays(ng, 0, t, sky.dl);
+  drawSeabed(ng, S.spot, t, sky.dl, H - 20);
+  for (const b of NET.bub) { ng.fillStyle = 'rgba(255,255,255,0.35)'; ng.fillRect(Math.round(b.x), Math.round(b.y), 2, 2); }
+  for (const o of NET.fish) drawSpr(ng, SPR[o.f.id], o.x, o.y, o.dir > 0);
+  if (NET.phase === 'aim') {
+    const R = NET.T.R, pul = 0.6 + 0.4 * Math.sin(NET.t * 6);
+    ng.globalAlpha = 0.1; disc(ng, NET.mx, NET.my, R, '#ffffff'); ng.globalAlpha = 1;
+    dotCircle(ng, NET.mx, NET.my, R, `rgba(255,255,255,${pul.toFixed(2)})`, 5);
+    ng.fillStyle = '#fff'; ng.fillRect(NET.mx - 3, NET.my, 7, 1); ng.fillRect(NET.mx, NET.my - 3, 1, 7);
+    ctext(ng, 'Sürüye nişan al ve TIKLA!', W / 2, 10, '#ffffff', 8);
+  } else if (NET.phase === 'cast') {
+    const u = clamp(NET.castT / 0.9, 0, 1), r = lerp(NET.T.R * 1.35, NET.T.R * 0.45, u * u * (3 - 2 * u));
+    ng.globalAlpha = 0.18; disc(ng, NET.cx, NET.cy, Math.round(r), '#e8d8a0'); ng.globalAlpha = 1;
+    dotCircle(ng, NET.cx, NET.cy, r, '#f0e0a8', 3);
+    ng.fillStyle = 'rgba(240,224,168,0.7)';
+    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI; plotLine(ng, NET.cx - Math.cos(a) * r, NET.cy - Math.sin(a) * r, NET.cx + Math.cos(a) * r, NET.cy + Math.sin(a) * r, 1); }
+    for (const o of NET.caught) drawSpr(ng, SPR[o.f.id], o.x, o.y, o.dir > 0);
+  } else if (NET.phase === 'result') {
+    ng.fillStyle = 'rgba(5,8,24,0.72)'; ng.fillRect(0, 0, W, H);
+    if (!NET.caught.length) {
+      ctext(ng, 'Ağ boş kaldı...', W / 2, 70, '#ff9a8a', 10);
+      ctext(ng, 'Bir dahaki sefere sürüye daha iyi nişan al', W / 2, 92, '#c8d0f0', 8);
+    } else {
+      ctext(ng, `AĞ DOLDU!  ${NET.caught.length} balık`, W / 2, 28, '#ffd166', 10);
+      const n = NET.caught.length, gap = 34, x0 = W / 2 - (n - 1) * gap / 2;
+      NET.caught.forEach((o, i) => { drawSpr(ng, SPR[o.f.id], x0 + i * gap, 78 + Math.round(Math.sin(NET.resT * 4 + i) * 2), true); ctext(ng, o.f.name.split(' ')[0].slice(0, 7), x0 + i * gap, 104, RARITY[o.f.rar].c, 6); });
+      ctext(ng, `+₺${fmt(NET.total)}`, W / 2, 140, '#ffffff', 14);
+    }
+  }
+}
+netCv.addEventListener('pointermove', e => {
+  const r = netCv.getBoundingClientRect(); NET.mx = (e.clientX - r.left) / r.width * W; NET.my = (e.clientY - r.top) / r.height * H;
+});
+netCv.addEventListener('pointerdown', e => {
+  e.preventDefault(); Snd.init();
+  const r = netCv.getBoundingClientRect(); NET.mx = (e.clientX - r.left) / r.width * W; NET.my = (e.clientY - r.top) / r.height * H;
+  if (NET.phase === 'aim') netCast(); else if (NET.phase === 'result') netClose();
+});
+$('#netCancel').addEventListener('click', () => { if (NET.phase === 'aim' || NET.phase === 'result') netClose(); });
+
+/* ================= başarımlar ================= */
+const ACH = [
+  { id: 'a1', n: 'İlk Balık', d: 'İlk balığını tut.', t: () => S.totalFish >= 1 },
+  { id: 'a2', n: 'Acemi Balıkçı', d: '100 balık tut.', t: () => S.totalFish >= 100 },
+  { id: 'a3', n: 'Usta Balıkçı', d: '1.000 balık tut.', t: () => S.totalFish >= 1000 },
+  { id: 'a4', n: 'Denizlerin Efendisi', d: '10.000 balık tut.', t: () => S.totalFish >= 10000 },
+  { id: 'a5', n: 'Cüzdan Doluyor', d: 'Toplam ₺1.000 kazan.', t: () => S.totalEarned >= 1e3 },
+  { id: 'a6', n: 'Servet', d: 'Toplam ₺100K kazan.', t: () => S.totalEarned >= 1e5 },
+  { id: 'a7', n: 'Balık Baronu', d: 'Toplam ₺10M kazan.', t: () => S.totalEarned >= 1e7 },
+  { id: 'a8', n: 'Meraklı', d: '8 farklı tür yakala.', t: () => speciesCount() >= 8 },
+  { id: 'a9', n: 'Koleksiyoncu', d: 'Bütün türleri yakala.', t: () => speciesCount() >= FISH.length },
+  { id: 'a10', n: 'Gece Kuşu', d: 'Gece çıkan bir balık tut.', t: () => S.nightCatch >= 1 },
+  { id: 'a11', n: 'İlk Ağ', d: 'Ağ at.', t: () => S.netCasts >= 1 },
+  { id: 'a12', n: 'Ağ Ustası', d: '25 kez ağ at.', t: () => S.netCasts >= 25 },
+  { id: 'a13', n: 'Şanslı Tık', d: '25 kritik vuruş yap.', t: () => S.crits >= 25 },
+  { id: 'a14', n: 'Altın Parıltı', d: 'Altın balığı yakala.', t: () => S.goldCaught >= 1 },
+  { id: 'a15', n: 'Sağlam Olta', d: 'Olta Lv.5 ol.', t: () => S.rodLv >= 5 },
+  { id: 'a16', n: 'Kadim Güç', d: 'Olta Lv.9 ol.', t: () => S.rodLv >= 9 },
+  { id: 'a17', n: 'Takım Kuruldu', d: 'Toplam 10 yardımcı satın al.', t: () => S.gens.reduce((a, b) => a + b, 0) >= 10 },
+  { id: 'a18', n: 'Açık Deniz', d: 'Deniz mekanını aç.', t: () => S.spotsUnlocked[2] }
+];
+function checkAch() {
+  let any = false;
+  for (const a of ACH) if (!S.ach[a.id] && a.t()) { S.ach[a.id] = 1; any = true; toast(`Başarım: ${a.n}  (+%2 bonus)`, 'gold'); }
+  if (any) { Snd.ach(); renderAch(); }
+}
+
+/* ================= arayüz ================= */
+function itemHTML(title, desc, btn, cost, attrs, cls = '') {
+  return `<div class="item"><div class="meta"><div class="t">${title}</div><div class="d">${desc}</div></div><button class="btn buy ${cls}" ${attrs} data-cost="${cost}">${btn}</button></div>`;
+}
+function skillHint() {
+  if (S.rodLv < 3) return `<span class="skill">Lv.3: Ağ Atma açılır (2–3 balık)</span>`;
+  if (S.rodLv < 6) return `<span class="skill">Lv.6: Ağ büyür (3–5 balık)</span>`;
+  if (S.rodLv < 9) return `<span class="skill">Lv.9: Ağ en güçlü hali (6–8 balık)</span>`;
+  return `<span class="skill">Bütün beceriler açık!</span>`;
+}
+function renderUpgrades() {
+  const rodNow = ROD[S.rodLv - 1], nxt = ROD[S.rodLv];
+  let h = `<div class="sec"><span>OLTA</span></div>`;
+  if (nxt) h += itemHTML(`${rodNow.n} · Lv.${S.rodLv}`, `Tık başına <b>×${rodNow.mult}</b> → <b>×${nxt.mult}</b><br>${skillHint()}`, `₺${fmt(nxt.cost)}`, nxt.cost, 'data-buy="rod"');
+  else h += `<div class="item"><div class="meta"><div class="t">${rodNow.n} · Lv.${S.rodLv}</div><div class="d">Tık başına <b>×${rodNow.mult}</b> · olta en üst seviyede.<br>${skillHint()}</div></div></div>`;
+  h += `<div class="sec"><span>GELİŞTİRMELER</span></div>`;
+  for (const u of UPG) {
+    const lv = S[u.key];
+    if (lv >= u.max) h += `<div class="item"><div class="meta"><div class="t">${u.n} · MAKS</div><div class="d">${u.d}<br><b>${u.eff(lv)}</b></div></div></div>`;
+    else h += itemHTML(`${u.n} · Lv.${lv}/${u.max}`, `${u.d}<br><b>${u.eff(lv)}</b> → <b>${u.eff(lv + 1)}</b>`, `₺${fmt(upgCost(u))}`, upgCost(u), `data-upg="${u.key}"`);
+  }
+  h += `<div class="sec"><span>YARDIMCILAR</span></div>`;
+  GEN.forEach((gn, i) => {
+    const c = genCost(gn, i);
+    h += itemHTML(`${gn.n} · ${S.gens[i]}`, `${gn.d}<br><b>+₺${fmt(gn.inc * globalMult())}/sn</b> her biri`, `₺${fmt(c)}`, c, `data-gen="${i}"`);
+  });
+  $('#upgList').innerHTML = h;
+  updateAfford();
+}
+function updateAfford() {
+  document.querySelectorAll('#upgList .buy').forEach(b => b.classList.toggle('cant', S.money < +b.dataset.cost));
+  document.querySelectorAll('#spotTabs .lock').forEach(b => b.classList.toggle('cant', S.money < +b.dataset.cost));
+}
+function buy(cost, apply) {
+  if (S.money < cost) { Snd.err(); toast('Yeterli paran yok', 'bad'); return false; }
+  S.money -= cost; apply(); Snd.buy(); renderUpgrades(); renderSpots(); renderTop(true); checkAch(); save();
+  return true;
+}
+$('#upgList').addEventListener('click', e => {
+  Snd.init();
+  const b = e.target.closest('.buy'); if (!b) return;
+  if (b.dataset.buy === 'rod') {
+    const nxt = ROD[S.rodLv];
+    if (nxt) buy(nxt.cost, () => {
+      S.rodLv++;
+      if (S.rodLv === 3 || S.rodLv === 6 || S.rodLv === 9) { const T = NET_TIERS[netTier()]; toast(S.rodLv === 3 ? `Beceri açıldı: Ağ Atma (${T.min}–${T.max} balık)` : `Ağ güçlendi: ${T.min}–${T.max} balık`, 'gold'); }
+    });
+  } else if (b.dataset.upg) {
+    const u = UPG.find(x => x.key === b.dataset.upg);
+    if (u && S[u.key] < u.max) buy(upgCost(u), () => { S[u.key]++; });
+  } else if (b.dataset.gen !== undefined) {
+    const i = +b.dataset.gen; buy(genCost(GEN[i], i), () => { S.gens[i]++; });
+  }
+});
+function renderSpots() {
+  const box = $('#spotTabs'); box.innerHTML = '';
+  SPOTS.forEach((sp, i) => {
+    const b = document.createElement('button');
+    const un = S.spotsUnlocked[i];
+    b.className = 'btn' + (un && S.spot === i ? ' on' : '') + (!un ? ' lock' : '');
+    b.dataset.cost = sp.cost;
+    b.textContent = un ? sp.n.toUpperCase() : `${sp.n.toUpperCase()} ₺${fmt(sp.cost)}`;
+    b.addEventListener('click', () => {
+      Snd.init();
+      if (un) { if (S.spot !== i) { S.spot = i; resetAmb(); renderSpots(); Snd.buy(); } }
+      else buy(sp.cost, () => { S.spotsUnlocked[i] = true; S.spot = i; resetAmb(); toast(`Yeni mekan: ${sp.n}`, 'gold'); });
+    });
+    box.appendChild(b);
+  });
+  updateAfford();
+}
+function renderAch() {
+  const box = $('#achList');
+  if (!box.children.length) box.innerHTML = ACH.map(a => `<div class="item ach" id="ach-${a.id}"><div class="meta"><div class="t">${a.n}</div><div class="d">${a.d}</div></div><div class="badge">+%2</div></div>`).join('');
+  ACH.forEach(a => $('#ach-' + a.id).classList.toggle('done', !!S.ach[a.id]));
+  $('#achBonus').textContent = `${achCount()}/${ACH.length} · +%${achCount() * 2}`;
+  $('#bonus').textContent = `+${achCount() * 2}%`;
+}
+function buildDex() {
+  const box = $('#dexList'); box.innerHTML = '';
+  FISH.forEach(f => {
+    const d = document.createElement('div'); d.className = 'dexcard'; d.id = 'dex-' + f.id;
+    const sp = SPR[f.id];
+    d.innerHTML = `<canvas width="${sp.w}" height="${sp.h}" style="width:${sp.w * 3}px;height:${sp.h * 3}px"></canvas><div class="dn"></div><div class="dr"></div><div class="dh"></div><div class="dc"></div>`;
+    box.appendChild(d);
+  });
+}
+function renderDex() {
+  let known = 0;
+  FISH.forEach(f => {
+    const d = $('#dex-' + f.id), c = S.species[f.id] || 0, cv = $('canvas', d);
+    if (c) known++;
+    const st = c ? 1 : 0;
+    if (cv._st !== st) { const gg = cv.getContext('2d'); gg.clearRect(0, 0, cv.width, cv.height); gg.drawImage(c ? SPR[f.id].r : SIL[f.id].r, 0, 0); cv._st = st; }
+    $('.dn', d).textContent = c ? f.name : '???';
+    const dr = $('.dr', d); dr.textContent = RARITY[f.rar].n; dr.style.color = RARITY[f.rar].c;
+    $('.dh', d).textContent = f.spot < 0 ? 'Özel olay · parıltıya tıkla' : `${SPOTS[f.spot].n} · ${hoursText(f)}`;
+    $('.dc', d).textContent = c ? `Yakalanan: ${c}` : '';
+  });
+  $('#dexCount').textContent = `${known}/${FISH.length}`;
+  dexDirty = false;
+}
+let lastTop = '';
+function renderTop(force) {
+  const m = '₺' + fmt(Math.floor(S.money)), p = '₺' + fmt(perSec()) + '/sn';
+  const key = m + p; if (!force && key === lastTop) return; lastTop = key;
+  $('#money').textContent = m; $('#perSec').textContent = p;
+}
+function renderClock() {
+  const h = hourOf();
+  $('#clock').textContent = `${pad2(Math.floor(h))}:${pad2(Math.floor((S.gameMin % 60)))}`;
+  $('#period').textContent = `Gün ${S.day} · ${periodName(h)}`;
+}
+function updateNetBtn() {
+  const tier = netTier(), b = $('#netBtn'), txt = $('#netTxt'), cd = $('#netCd');
+  if (!tier) { b.classList.add('cant'); txt.textContent = "AĞ ATMA — Olta Lv.3'te açılır"; cd.style.width = '0'; $('#netHint').textContent = 'Olta seviyesi arttıkça yeni beceriler açılır. Ağ atınca ekrana özel bir sahne gelir.'; return; }
+  const T = NET_TIERS[tier], left = (S.netReadyAt - Date.now()) / 1000;
+  $('#netHint').textContent = `Ağ kademesi ${tier}/3: ${T.min}–${T.max} balık, yeniden hazırlanma ${T.cd} sn. Daha fazla balık için olta seviyeni yükselt.`;
+  if (left > 0) { b.classList.add('cant'); txt.textContent = `AĞ HAZIRLANIYOR… ${Math.ceil(left)} sn`; cd.style.width = (clamp(left / T.cd, 0, 1) * 100) + '%'; }
+  else { b.classList.remove('cant'); txt.textContent = `AĞ AT (${T.min}–${T.max} balık)`; cd.style.width = '0'; }
+}
+$('#netBtn').addEventListener('click', () => { Snd.init(); netOpen(); });
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  document.querySelectorAll('#tabs .btn').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x.id === 'tab-' + b.dataset.tab));
+  if (b.dataset.tab === 'dex') renderDex();
+  if (b.dataset.tab === 'ach') renderAch();
+});
+function renderMute() { $('#muteBtn').textContent = S.muted ? 'SES: KAPALI' : 'SES: AÇIK'; }
+$('#muteBtn').addEventListener('click', () => { Snd.init(); S.muted = !S.muted; renderMute(); save(); });
+
+// kayıt işlemleri
+$('#expBtn').addEventListener('click', () => {
+  try { $('#saveBox').value = btoa(unescape(encodeURIComponent(JSON.stringify(S)))); $('#saveBox').select(); toast('Kayıt kodu hazır, kopyalayabilirsin', 'good'); } catch (e) { toast('Dışa aktarma başarısız', 'bad'); }
+});
+$('#impBtn').addEventListener('click', () => {
+  try {
+    const d = JSON.parse(decodeURIComponent(escape(atob($('#saveBox').value.trim()))));
+    if (typeof d !== 'object' || d === null || !('money' in d)) throw 0;
+    localStorage.setItem(KEY, JSON.stringify(d)); resetting = true; location.reload();
+  } catch (e) { toast('Geçersiz kayıt kodu', 'bad'); }
+});
+$('#resetBtn').addEventListener('click', () => {
+  if (confirm('Bütün ilerleme silinecek. Emin misin?')) { resetting = true; try { localStorage.removeItem(KEY); } catch (e) { } location.reload(); }
+});
+
+/* ================= çevrimdışı kazanç ================= */
+function offlineGain(sec, label) {
+  const ps = perSec();
+  if (ps <= 0 || sec < 30) return;
+  const eff = Math.min(sec, 7200), gain = ps * eff * 0.5;
+  addMoney(gain); toast(`${label} ₺${fmt(gain)} kazandın (${Math.max(1, Math.round(eff / 60))} dk)`, 'good');
+}
+
+/* ================= ana döngü ================= */
+let last = performance.now(), T0 = last, hudT = 0, saveT = 0, achT = 0, dexT = 0;
+function update(dt, t) {
+  S.gameMin += dt;
+  if (S.gameMin >= 1440) { S.gameMin -= 1440; S.day++; }
+  const ps = perSec(); if (ps > 0) addMoney(ps * dt);
+  rod.kick = Math.max(0, rod.kick - dt * 4); rod.bump = Math.max(0, rod.bump - dt * 6);
+  for (const r of ripples) r.t += dt * 1.6;
+  for (let i = ripples.length - 1; i >= 0; i--) if (ripples[i].t >= 1) ripples.splice(i, 1);
+  for (const a of arcs) a.t += dt;
+  for (let i = arcs.length - 1; i >= 0; i--) if (arcs[i].t >= arcs[i].dur) { onLand(arcs[i]); arcs.splice(i, 1); }
+  for (const p of parts) { p.life += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 130 * dt; }
+  for (let i = parts.length - 1; i >= 0; i--) if (parts[i].life >= parts[i].max) parts.splice(i, 1);
+  for (const x of texts) { x.life += dt; x.y -= 12 * dt; }
+  for (let i = texts.length - 1; i >= 0; i--) if (texts[i].life >= texts[i].max) texts.splice(i, 1);
+  if (Math.random() < dt * 4) bubbles.push({ x: rand(8, W - 8), y: H - 24, vy: rand(8, 18), ph: rand(0, 6) });
+  for (const b of bubbles) { b.y -= b.vy * dt; b.x += Math.sin(t * 2 + b.ph) * 4 * dt; }
+  for (let i = bubbles.length - 1; i >= 0; i--) if (bubbles[i].y < HOR + 3) bubbles.splice(i, 1);
+  for (let i = 0; i < amb.length; i++) {
+    const a = amb[i]; a.x += a.vx * dt; a.y = a.by + Math.sin(t * 1.5 + a.ph) * 2;
+    if (a.x < -45 || a.x > W + 45) { amb.splice(i, 1); i--; spawnAmb(false); }
+  }
+  if (!GOLD.on) { GOLD.timer -= dt; if (GOLD.timer <= 0 && !NET.on && document.visibilityState === 'visible') spawnGold(); }
+  else {
+    GOLD.x += GOLD.vx * dt; GOLD.t += dt; GOLD.y = GOLD.by + Math.sin(GOLD.t * 2.2) * 6;
+    if (GOLD.x < -30 || GOLD.x > W + 30) { GOLD.on = false; GOLD.timer = rand(60, 120); toast('Altın balık kaçtı...'); }
+  }
+  if (NET.on) netUpdate(dt);
+}
+function frame(now) {
+  const raw = (now - last) / 1000; last = now;
+  if (raw > 5) offlineGain(raw, 'Sekme arkadayken'); // sekme uzun süre gizli kaldıysa
+  const dt = Math.min(raw, 0.1), t = (now - T0) / 1000;
+  update(dt, t);
+  render(t);
+  if (NET.on) netDraw();
+  hudT += dt; saveT += dt; achT += dt; dexT += dt;
+  renderTop();
+  if (hudT > 0.2) { hudT = 0; renderClock(); updateNetBtn(); updateAfford(); }
+  if (achT > 2) { achT = 0; checkAch(); }
+  if (dexT > 0.5) { dexT = 0; if (dexDirty && $('#tab-dex').classList.contains('on')) renderDex(); }
+  if (saveT > 5) { saveT = 0; save(); }
+  requestAnimationFrame(frame);
+}
+window.addEventListener('beforeunload', save);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); });
+
+/* ================= başlat ================= */
+buildDex(); renderDex(); renderAch(); renderSpots(); renderUpgrades(); renderMute(); renderClock(); renderTop(true); updateNetBtn();
+resetAmb();
+if (loadedFromSave) offlineGain((Date.now() - (S.saved || Date.now())) / 1000, 'Sen yokken');
+else toast('Hoş geldin! Suya tıkla ve ilk balığını tut.', 'good');
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
